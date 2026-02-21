@@ -125,7 +125,8 @@ def main():
             for task in tasks:
                 if task["id"] != task_id:
                     new_tasks.append(task)
-                    tasks = new_tasks
+
+            tasks = new_tasks
 
             # Check if we actually removed any task
             if len(tasks) < original_count:
@@ -217,6 +218,13 @@ def main():
             status_filter = None
             # print("listing all tasks")
 
+        valid_statuses = ["todo", "in-progress", "done", None]
+        if status_filter not in valid_statuses:
+            print(
+                f"Error: '{status_filter}' is not a valid status.\nValid statuses are: todo, in-progress, done"
+            )
+            return
+
         # printing a header for the table
         print("\nID     Status               Description")
         print("-" * 50)
@@ -225,7 +233,7 @@ def main():
             # if there is no filter or if the task matches the filter, print it
             if status_filter is None or task["status"] == status_filter:
                 print(
-                    f"{task["id"]}      {task['status']:<15}      {task["description"]}"
+                    f"{task['id']}      {task['status']:<15}      {task['description']}"
                 )
         print("-" * 50)
 
