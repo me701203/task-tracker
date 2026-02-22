@@ -22,11 +22,15 @@ def load_tasks():
 
 
 def save_tasks(tasks):
-    # using "with" so the file closes immidiately after
-    with open(TASKS_FILE, "w", encoding="utf-8") as f:
-        # indention just for making is better to read
-        # making persian charachters available
-        json.dump(tasks, f, indent=4, ensure_ascii=False)
+    try:
+        with open(TASKS_FILE, "w", encoding="utf-8") as f:
+            json.dump(tasks, f, indent=4, ensure_ascii=False)
+    except PermissionError:
+        print(
+            "\nError: Could not write to tasks.json. Is the file open in another program or read-only?"
+        )
+    except Exception as e:
+        print(f"\nAn unexpected error occurred while saving: {e}")
 
 
 def main():
@@ -200,6 +204,33 @@ def main():
                 print(
                     f"Task {task_id} was not found, try getting the right ID by running 'list' "
                 )
+        except ValueError:
+            print("Error: Task ID must be a number.")
+            return
+
+    elif command == "mark-todo":
+        if len(sys.argv) < 3:
+            print("Usage: task-cli mark-todo [id]")
+            return
+
+        try:
+            task_id = int(sys.argv[2])
+            tasks = load_tasks()
+            found = False
+
+            for task in tasks:
+                if task["id"] == task_id:
+                    task["status"] = "todo"
+                    task["updatedAt"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    found = True
+                    break
+
+            if found:
+                save_tasks(tasks)
+                print(f"Task {task_id} status reset to 'todo'.")
+            else:
+                print(f"Error: Task {task_id} not found.")
+
         except ValueError:
             print("Error: Task ID must be a number.")
             return
