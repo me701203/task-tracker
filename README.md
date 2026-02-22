@@ -14,45 +14,49 @@ A simple Command Line Interface (CLI) application to manage your tasks, track th
 
 To use this project on your own machine, follow these steps:
 
-1. **Clone the repository:**
+0. **Clone the repository:**
 ```bash
 git clone [https://github.com/me701203/task-tracker.git](https://github.com/me701203/task-tracker.git)
 cd task-tracker
+```
 
 ## How to Use
-
-# Add a task
+# 1. Add a Task
+```bash
 python task_cli.py add "Buy groceries"
+```
 
-# Update a task description
+# 2. Update a task description
+```bash
 python task_cli.py update 1 "Buy groceries and cook dinner"
-
-# Delete a task
+```
+# 3. Delete a task
+```bash
 python task_cli.py delete 1
+```
 
-# Update a task description
-python task_cli.py update 1 "Buy groceries and cook dinner"
-
-# Delete a task
-python task_cli.py delete 1
-
-# Mark a task as todo, in-progress, or done
+# 4. Mark a task as todo, in-progress, or done
+```bash
 python task_cli.py mark-todo 1
 python task_cli.py mark-in-progress 1
 python task_cli.py mark-done 1
+```
 
-# List all tasks
+# 5. List all tasks
+```bash
 python task_cli.py list
+```
 
-# List tasks by status
+# 6. List tasks by status
+```bash
 python task_cli.py list todo
 python task_cli.py list in-progress
 python task_cli.py list done
 ```
 # Technical Details
 
-Language: Python 3
+- Language: Python 3
 
-Storage: JSON (tasks.json)
+- Storage: JSON (tasks.json)
 
-Character Support: UTF-8 (supports Persian/Farsi and other scripts)
+- Character Support: UTF-8 (supports Persian/Farsi and other scripts)
