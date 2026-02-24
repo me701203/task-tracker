@@ -67,8 +67,7 @@ python task_cli.py stats
 ```
 
 # 9. Maintenance (clear done tasks)
-[!WARNING]
-This command will permanently remove all tasks marked as done from your storage. The app will ask for a (y/n) confirmation before proceeding.
+> **⚠️ WARNING:** This command will permanently remove all tasks marked as `done` from your storage. The app will ask for a `(y/n)` confirmation before proceeding.
 ```bash
 python task_cli.py clear-done
 ```
