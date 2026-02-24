@@ -8,6 +8,8 @@ A simple Command Line Interface (CLI) application to manage your tasks, track th
 - **Delete** tasks by ID.
 - **Mark** tasks as `todo`, `in-progress`, or `done`.
 - **List** all tasks or filter them by status.
+- **Advanced Sorting**: View tasks by most recently updated using `list recent`.
+- **Productiviy Stats**: Get a quick summary of your task counts with `stats` command.
 - **Data Persistence**: All tasks are saved in a `tasks.json` file.
 
 ## Getting Started
@@ -16,7 +18,7 @@ To use this project on your own machine, follow these steps:
 
 0. **Clone the repository:**
 ```bash
-git clone [https://github.com/me701203/task-tracker.git](https://github.com/me701203/task-tracker.git)
+git clone https://github.com/me701203/task-tracker.git
 cd task-tracker
 ```
 
@@ -53,6 +55,31 @@ python task_cli.py list todo
 python task_cli.py list in-progress
 python task_cli.py list done
 ```
+
+# 7. Sort by recent activity
+```bash
+python task_cli.py list recent
+```
+
+# 8. View your progress
+```bash
+python task_cli.py stats
+```
+
+# 9. Maintenance (clear done tasks)
+[!WARNING]
+This command will permanently remove all tasks marked as done from your storage. The app will ask for a (y/n) confirmation before proceeding.
+```bash
+python task_cli.py clear-done
+```
+
+## Error Handling
+- **Invalid IDs**: The app checks if a task ID exists before trying to update or delete it.
+
+- **File Safety**: Uses with blocks and try-except to prevent data corruption if the JSON file is missing or busy.
+
+- **Empty States**: If you have no tasks, the app provides a friendly welcome message and instructions on how to start.
+
 # Technical Details
 
 - Language: Python 3
