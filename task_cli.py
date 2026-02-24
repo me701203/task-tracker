@@ -33,10 +33,52 @@ def save_tasks(tasks):
         print(f"\nAn unexpected error occurred while saving: {e}")
 
 
+def show_help():
+    print("\n--- Task Tracker CLI Help ---")
+    print("Usage: python task_cli.py [command] [arguments]")
+
+    print("\n VIEWING TASKS")
+    print("  list                    - Display all tasks by their ID (Oldest first)")
+    print("  list [status]           - Filter by: todo, in-progress, or done")
+    print(
+        "  list recent             - View all tasks sorted by the last time they were changed"
+    )
+
+    print("\n  MANAGING TASKS")
+    print(
+        "  add [description]       - Create a new task (automatically sets to 'todo')"
+    )
+    print("  update [id] [text]      - Change the description of an existing task")
+    print("  delete [id]             - Permanently remove a task from your list")
+
+    print("\n UPDATING STATUS")
+    print("  mark-todo [id]          - Move a task back to the 'todo' list")
+    print("  mark-in-progress [id]   - Mark a task as currently being worked on")
+    print("  mark-done [id]          - Complete a task (Great job!)")
+
+    print("\n MAINTENANCE")
+    print("  clear-done              - Remove all 'done' tasks to keep your file clean")
+    print("  stats                   - Show a summary of your productivity")
+    print("  help                    - Show this menu")
+    print("-" * 40)
+
+
 def main():
+    # --- FIRST TIME WELCOME ---
+    if not os.path.exists(TASKS_FILE):
+        print("🌟 Welcome to Task Tracker CLI! 🌟")
+        print("It looks like this is your first time running the app.")
+        print(
+            "I've created a new storage file for you. Type 'python task_cli.py help' if you ever felt lost!"
+        )
+        print("-" * 40)
+        # We create an empty file immediately so this message only shows once
+        save_tasks([])
+
     # 1. Check if the user typed anything at all
     if len(sys.argv) < 2:
-        print("Usage: task-cli [command] [arguments]")
+        print("You should tell me what to do.")
+        show_help()
         return
 
     # 2. Capture the main command (add, update, delete, etc.)
@@ -46,6 +88,7 @@ def main():
         # Check if user provided a task name
         if len(sys.argv) < 3:
             print("Error: Please provide a task description")
+            print('Usage: python task_cli.py add "Your task description here"')
             return
 
         description = " ".join(sys.argv[2:])
@@ -82,6 +125,7 @@ def main():
     elif command == "update":
         # Update needs ID and a new description
         if len(sys.argv) < 4:
+            print("Error: Missing ID or new description.")
             print("Usage: task-cli update [id] [new description]")
             return
         try:
@@ -118,7 +162,8 @@ def main():
 
         # delete needs ID
         if len(sys.argv) < 3:
-            print("Usage: task-cli delete [id]")
+            print("Error: Missing Task ID.")
+            print("Usage: task-cli.py delete [id]")
             return
         try:
             task_id = int(sys.argv[2])
@@ -148,7 +193,8 @@ def main():
     elif command == "mark-in-progress":
         # Update the task status
         if len(sys.argv) < 3:
-            print(f"Usage: task-cli mark-in-progress [id]")
+            print("Error: you need to provide and ID.")
+            print("Usage: task-cli.py mark-in-progress [id]")
             return
 
         try:
@@ -180,7 +226,8 @@ def main():
     elif command == "mark-done":
         # Update the task status to DOne
         if len(sys.argv) < 3:
-            print(f"Usage: task-cli mark-done [id]")
+            print("Error: Please Provide and ID.")
+            print("Usage: task-cli mark-done [id]")
             return
 
         try:
@@ -241,6 +288,7 @@ def main():
         if not tasks:
             print("There's Nothing Here, Consider adding a task with 'add' command")
             return
+
         # List shows all the tasks or shows the done tasks or shows the in-progress tasks or todo
         if len(sys.argv) > 2:
             status_filter = sys.argv[2].lower()
@@ -249,30 +297,99 @@ def main():
             status_filter = None
             # print("listing all tasks")
 
-        valid_statuses = ["todo", "in-progress", "done", None]
+        valid_statuses = ["todo", "in-progress", "done", "recent", None]
         if status_filter not in valid_statuses:
             print(
-                f"Error: '{status_filter}' is not a valid status.\nValid statuses are: todo, in-progress, done"
+                f"Error: '{status_filter}' is not a valid status.\nValid statuses are: todo, in-progress, done, recent"
             )
             return
 
+        if status_filter == "recent":
+            tasks.sort(key=lambda x: x["updatedAt"], reverse=True)
+
         # printing a header for the table
-        print("\nID     Status               Description")
+        print("\n     ID     Status               Description")
         print("-" * 50)
 
         for task in tasks:
-            # if there is no filter or if the task matches the filter, print it
-            if status_filter is None or task["status"] == status_filter:
+            # If it's 'recent' or None, we show EVERYTHING (just in different order)
+            # If it's todo/done/in-progress, we filter it
+            if status_filter in [None, "recent"] or task["status"] == status_filter:
                 print(
-                    f"{task['id']}      {task['status']:<15}      {task['description']}"
+                    f"     {task['id']}      {task['status']}                 {task['description']}"
                 )
         print("-" * 50)
 
+    elif command == "help":
+        # We reuse the same logic we want for the unknown commands
+        show_help()
+
+    elif command == "clear-done":
+        tasks = load_tasks()
+
+        # 1. Create a brand new empty list to hold the tasks we want to KEEP
+        fresh_tasks = []
+
+        # 2. Go through every task in our current list
+        for task in tasks:
+            # 3. If the task is NOT done, it stays!
+            if task["status"] != "done":
+                fresh_tasks.append(task)
+
+        # 4. Check if we actually have anything to remove
+        removed_count = len(tasks) - len(fresh_tasks)
+
+        if removed_count > 0:
+            # --- THE NEW CONFIRMATION QUESTION ---
+            print(
+                f"Warning: This will permanently delete {removed_count} 'done' tasks."
+            )
+            confirm = input("Are you sure you want to proceed? (y/n): ").lower()
+
+            if confirm == "y":
+                save_tasks(fresh_tasks)
+                print(f"Successfully cleaned up {removed_count} completed tasks.")
+            else:
+                print("Action canceled. No tasks were deleted.")
+
+        else:
+            print("No completed tasks to remove.")
+
+    # adding stats like: "You have 4 Todo, 1 In-Progress, and 12 Done."
+    elif command == "stats":
+        tasks = load_tasks()
+
+        if not tasks:
+            print("📊 Stats: You have no tasks yet. Add some to see progress!")
+            return
+
+        # Initialize our counters
+        todo_count = 0
+        in_progress_count = 0
+        done_count = 0
+
+        # Loop through and count
+        for task in tasks:
+            if task["status"] == "todo":
+                todo_count += 1
+            elif task["status"] == "in-progress":
+                in_progress_count += 1
+            elif task["status"] == "done":
+                done_count += 1
+
+        total = len(tasks)
+
+        print("\n--- Task Statistics ---")
+        print(f"Todo:        {todo_count}")
+        print(f"In-Progress: {in_progress_count}")
+        print(f"Done:        {done_count}")
+        print("-" * 25)
+        print(f"Total Tasks: {total}")
+        print("-" * 25)
+
     else:
-        print(
-            "these are the list of commands you can use:\n add, update, delete, mark-in-progress,"
-            " mark-done, list, list done, list todo, list in-progress\n write 'task-cli [command] to check the usage"
-        )
+        print(f"\nError: '{command}' is not a recognized command.")
+        show_help()
 
 
 if __name__ == "__main__":
